@@ -28,3 +28,6 @@ create table board (
   name varchar(255),
   subtext varchar(255)
 );
+
+insert into board values("g", "Technology", "install gentoo");
+insert into board values("n", "News", "Goings-on");

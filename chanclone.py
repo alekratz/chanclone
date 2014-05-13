@@ -3,6 +3,7 @@
 import sqlite3, os
 from flask import Flask, render_template, g
 from post import Post
+from board import Board, getBoards, reloadBoardCache
 
 # Load the application
 app = Flask(__name__)
@@ -35,16 +36,21 @@ def close_db(error):
   if(hasattr(g, "sqlite_db")):
     g.sqlite_db.close()
 
+def init_db():
+  with app.app_context():
+    db = get_db()
+    with app.open_resource('schema.sql', mode='r') as f:
+      db.cursor().executescript(f.read())
+    db.commit()
+
 #
 # Routing methods
 #
 @app.route("/<board>/")
 def boardPage(board):
+  b = getBoards(get_db())[board]
   return render_template("board.html", board=board,
-    post_list=[Post(get_db(), 12, None, "g", "Welcome to /g/!", "Alek",
-    """
-    I'm just using this post to let you know that I welcome you to /g/!
-    """, None, 0)])
+    post_list=b.getPosts())
 
 @app.route("/")
 def index():
