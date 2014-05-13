@@ -1,6 +1,5 @@
 class Post:
-  def __init__(self, db, num, datetime, board, title, name, content, image_src, parent):
-    self.db = db
+  def __init__(self, num, datetime, board, title, name, content, image_src, parent):
     self.number = num
     self.datetime = datetime
     self.board = board

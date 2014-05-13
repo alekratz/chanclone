@@ -1,6 +1,17 @@
 {% extends "layout.html" %}
 {% block title %}{{ board }}{% endblock %}
 {% block body %}
+  {% block compose %}
+  <div id="compose">
+  <form method="post" action="{{ url_for('newthread', board=board) }}">
+  <div class="input"><b>Title: </b><input class="text" type="text" name="title"/></div>
+  <div class="input"><b>Name: </b><input class="text" type="text" name="name"/></div>
+  <div class="input"><b>Message: </b><br/><textarea name="content"></textarea></div>
+  <div class="input"><input type="submit"></div>
+  </form>
+  </div>
+  {% endblock %}
+
   <ol id="posts">
   {% for post in post_list %}
     <div class="post">
@@ -8,9 +19,8 @@
         <div class="post-head">
           {{ post.number }} - 
           <span class="title">{{ post.title }}</span> 
-          <span class="name">{{ post.name }}</span><br/>
-        </div>
-
+          <span class="name">{{ post.name }}</span>
+        </div><br/>
         <span class="content">{{ post.content }}</span>
       </li>
     </div>

@@ -50,7 +50,15 @@ def init_db():
 def boardPage(board):
   b = getBoards(get_db())[board]
   return render_template("board.html", board=board,
-    post_list=b.getPosts())
+    post_list=b.getPosts(get_db()))
+
+@app.route("/<board>/newthread")
+def newthread(board, method=['GET', 'POST']):
+  if request.method == "POST":
+    title = request.form["title"]
+    name = "Anonymous" if request.form["name"] == "" else request.form["name"]
+    content = request.form["content"]
+    parent = 0
 
 @app.route("/")
 def index():

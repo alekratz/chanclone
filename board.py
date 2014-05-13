@@ -13,20 +13,19 @@ def getBoards(db):
     entries = result.fetchall()
     boards = {}
     for row in entries:
-      b = Board(db, row['url'], row['name'], row['subtext'])
+      b = Board(row['url'], row['name'], row['subtext'])
       boards[row['url']] = b
     board_cache = boards
   return board_cache
 
 class Board:
-  def __init__(self, db, url, name, subtext):
-    self.db = db
+  def __init__(self, url, name, subtext):
     self.url = url
     self.name = name
     self.subtext = subtext
 
-  def getPosts(self):
-    result = self.db.execute("select * from post where board='"+"'")
+  def getPosts(self, db):
+    result = db.execute("select * from post where board='"+"'")
     entries = result.fetchall()
     posts = []
     for post in entries:
