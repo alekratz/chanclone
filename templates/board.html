@@ -4,9 +4,9 @@
   {% block compose %}
   <div id="compose">
   {% if number %}
-  <form method="post" action="{{ url_for('respond', board=board, number=number) }}">
+  <form method="post" action="{{ url_for('respond', board=board, number=number) }}" enctype="multipart/form-data">
   {% else %}
-  <form method="post" action="{{ url_for('newthread', board=board) }}">
+  <form method="post" action="{{ url_for('newthread', board=board) }}" enctype="multipart/form-data" >
   {% endif %}
   <div class="input"><b>Title: </b><input class="text" type="text" name="title"/></div>
   <div class="input"><b>Name: </b><input class="text" type="text" name="name"/></div>
@@ -29,6 +29,9 @@
         <span class="name">{{ post.name }}</span>
         <span class="time">{{ post.post_time }}</span><br/>
         </div>
+        {% if post.image_src %}
+        <span class="image">{{ post.image_src }}</span>
+        {% endif %}
         <span class="content">{{ post.content }}</span>
         {% for childid, child in post.children.iteritems() %}
           <div class="post child" id="{{ childid }}">

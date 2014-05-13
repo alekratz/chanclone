@@ -1,9 +1,10 @@
 #!/usr/bin/python
 
-import sqlite3, os, logging
+import sqlite3, os, logging, time
 from logging.handlers import RotatingFileHandler as RFH
-from flask import Flask, render_template, g, request, flash
+from flask import Flask, render_template, g, request, flash, redirect, url_for, send_from_directory
 from werkzeug.routing import BaseConverter
+from werkzeug.utils import secure_filename
 from post import Post
 from board import Board, getBoards, reloadBoardCache
 
@@ -16,15 +17,37 @@ class RegexConverter(BaseConverter):
     super(RegexConverter, self).__init__(url_map)
     self.regex = items[0]
 
-app.url_map.converters['regex'] = RegexConverter
+ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'bmp', 'gif' ]
+
 # Load default config and override config from the environment
 app.config.update(dict(
   DATABASE=os.path.join(app.root_path, "chanclone.db"),
   DEBUG=True,
   SECRET_KEY='SECRET_DEVELOPMENT_KEY',
   USERNAME='admin',
-  PASSWORD='changeme'
+  PASSWORD='changeme',
+  UPLOAD_FOLDER='static/img'
 ))
+
+app.url_map.converters['regex'] = RegexConverter
+
+#
+# Utility functions
+#
+def allowed_file(filename):
+  return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+def get_file_ext(filename):
+  if '.' in filename:
+    return filename.rsplit(".", 1)[1]
+  else:
+    return ''
+
+def verify_path(location):
+  if os.path.exists(location) and os.path.isdir(location):
+    return
+  else:
+    os.mkdir(location)
 
 #
 # Database methods
@@ -58,7 +81,6 @@ def init_db():
 #
 # Routing methods
 #
-
 @app.route("/<board>/")
 def boardPage(board):
   b = getBoards(get_db())[board]
@@ -79,19 +101,34 @@ def resPage(board, number):
 
 @app.route("/<board>/<regex('[0-9]+'):number>/res", methods=['POST'])
 def respond(board, number):
-  if request.method == "POST":
-    title = request.form['title']
-    name = "Anonymous" if request.form["name"] == "" else request.form["name"]
-    content = request.form["content"]
-    parent = number
-    db = get_db();
-    db.execute(
-    """
-    insert into post(post_time, board, title, name, content, image_src, parent)
-    values (datetime('now'), ?, ?, ?, ?, null, ?)
-    """, [board, title, name, content, parent])
-    db.commit();
-    return "<center><h1>Post successful!</h1></center>"
+  title = request.form['title']
+  name = "Anonymous" if request.form["name"] == "" else request.form["name"]
+  content = request.form["content"]
+  parent = number
+  image_src = None
+
+  upload = request.files['image']
+  if upload:
+    if allowed_file(upload.filename):
+      filename = "{0}.{1}".format(int(time.time()), get_file_ext(upload.filename))
+      upload_path = os.path.join(app.config['UPLOAD_FOLDER'], board)
+      verify_path(upload_path)
+      upload.save(os.path.join(upload_path, filename))
+      image_src = os.path.join(upload_path, filename)
+    else:
+      return "<center><h1>Error: file must be an image</h1></center>"
+
+  if image_src == None and content == "":
+    return "<center><h1>You must fill out either the file or content form</h1></center>"
+
+  db = get_db();
+  db.execute(
+  """
+  insert into post(post_time, board, title, name, content, image_src, parent)
+  values (datetime('now'), ?, ?, ?, ?, ?, ?)
+  """, [board, title, name, content, image_src, parent])
+  db.commit();
+  return "<center><h1>Post successful!</h1></center>"
 
 @app.route("/<board>/newthread/", methods=['POST'])
 def newthread(board):
@@ -99,12 +136,28 @@ def newthread(board):
     title = request.form["title"]
     name = "Anonymous" if request.form["name"] == "" else request.form["name"]
     content = request.form["content"]
+    image_src = None
+
+    # Image uploading
+    upload = request.files['image']
+    if upload:
+      if allowed_file(upload.filename):
+        filename = "{0}.{1}".format(int(time.time()), get_file_ext(upload.filename))
+        upload_path = os.path.join(app.config['UPLOAD_FOLDER'], board)
+        verify_path(upload_path)
+        upload.save(os.path.join(upload_path, filename))
+        image_src = os.path.join(upload_path, filename)
+      else:
+        return "<center><h1>Error: file must be an image</h1></center>"
+
+    if image_src == None and content == "":
+      return "<center><h1>You must fill out either the file or content form</h1></center>"
     db = get_db()
     db.execute(
       """
       insert into post(post_time, board, title, name, content, image_src)
-      values (datetime('now'), ?, ?, ?, ?, null)
-      """, [board, title, name, content])
+      values (datetime('now'), ?, ?, ?, ?, ?)
+      """, [board, title, name, content, image_src])
     db.commit()
     app.logger.info("Added new post in " + board)
     return "<center><h1>Post successful!</h1></center"
