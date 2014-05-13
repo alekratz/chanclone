@@ -30,6 +30,7 @@ body {
 
 .post {
   border: ridge black;
+  padding: 3px;
 }
 
 .title {
