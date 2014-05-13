@@ -28,10 +28,18 @@ class Board:
   def getPosts(self, db):
     result = db.execute("select * from post where board=? order by post_time desc", self.url)
     entries = result.fetchall()
-    posts = []
-    for post in entries:
-      newPost = Post(post['id'], post['post_time'], post['board'], post['title'],
-        post['name'], post['content'], post['image_src'], post['parent'])
-      posts.append(newPost)
+    posts = {}
+
+    # create post objects
+    for row in entries:
+      newPost = Post(row['id'], row['post_time'], row['board'], row['title'],
+        row['name'], row['content'], row['image_src'], row['parent'])
+      posts[row['id']] = newPost
+
+    # add children to the posts
+    for number in posts:
+      p = posts[number]
+      if p.parent != None:
+        posts[p.parent].children[p.number] = p
     return posts
 

@@ -8,3 +8,4 @@ class Post:
     self.content = content
     self.image_src = image_src
     self.parent = parent
+    self.children = {}

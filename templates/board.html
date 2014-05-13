@@ -3,29 +3,46 @@
 {% block body %}
   {% block compose %}
   <div id="compose">
+  {% if number %}
+  <form method="post" action="{{ url_for('respond', board=board, number=number) }}">
+  {% else %}
   <form method="post" action="{{ url_for('newthread', board=board) }}">
+  {% endif %}
   <div class="input"><b>Title: </b><input class="text" type="text" name="title"/></div>
   <div class="input"><b>Name: </b><input class="text" type="text" name="name"/></div>
   <div class="input"><b>Message: </b><br/><textarea name="content"></textarea></div>
-  <div class="input"><input type="submit"></div>
+  <div class="input"><input type="submit"/></div>
   </form>
   </div>
   {% endblock %}
-
+  <hr />
   <ol id="posts">
-  {% for post in post_list %}
-    <div class="post" id="{{ post.number }}">
-      <li id="{{ post.number }}">
+  {% for id, post in post_list.iteritems() %}
+    {% if not post.parent %}
+    <li>
+      <div class="post" id="{{ id }}">
         <div class="post-head">
-          {{ post.number }} - 
-          <span class="title">{{ post.title }}</span> 
-          <span class="name">{{ post.name }}</span>
-          <span class="time">{{ post.post_time }}</span>
-        </div><br/>
+        {{ id }} - 
+        <span class="title">{{ post.title }}</span> 
+        <span class="name">{{ post.name }}</span>
+        <span class="time">{{ post.post_time }}</span><br/>
+        </div>
         <span class="content">{{ post.content }}</span>
-      </li>
-    </div>
+        {% for childid, child in post.children.iteritems() %}
+          <div class="post child" id="{{ childid }}">
+            <div class="post-head">
+            {{ childid }} - 
+            <span class="title">{{ child.title }}</span> 
+            <span class="name">{{ child.name }}</span>
+            <span class="time">{{ child.post_time }}</span><br/>
+            </div>
+            <span class="content">{{ child.content }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </li>
     <hr />
+    {% endif %}
   {% endfor %}
   </ol>
 {% endblock %}

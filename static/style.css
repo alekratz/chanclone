@@ -41,6 +41,11 @@ hr {
   background-color: #ccc;
 }
 
+.post .child {
+  background-color: #d5d5d5;
+  margin-bottom: 5px;
+}
+
 .title {
   color: #5a5;
 }

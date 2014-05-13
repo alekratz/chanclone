@@ -3,6 +3,7 @@
 import sqlite3, os, logging
 from logging.handlers import RotatingFileHandler as RFH
 from flask import Flask, render_template, g, request, flash
+from werkzeug.routing import BaseConverter
 from post import Post
 from board import Board, getBoards, reloadBoardCache
 
@@ -10,6 +11,12 @@ from board import Board, getBoards, reloadBoardCache
 app = Flask(__name__)
 app.config.from_object(__name__)
 
+class RegexConverter(BaseConverter):
+  def __init__(self, url_map, *items):
+    super(RegexConverter, self).__init__(url_map)
+    self.regex = items[0]
+
+app.url_map.converters['regex'] = RegexConverter
 # Load default config and override config from the environment
 app.config.update(dict(
   DATABASE=os.path.join(app.root_path, "chanclone.db"),
@@ -58,7 +65,33 @@ def boardPage(board):
   posts = b.getPosts(get_db())
   app.logger.info("Retrieving " + str(len(posts)) + " posts")
   return render_template("board.html", board=board,
-    post_list=b.getPosts(get_db()))
+    post_list=posts)
+
+@app.route("/<board>/<regex('[0-9]+'):number>")
+def resPage(board, number):
+  b = getBoards(get_db())[board]
+  post = b.getPosts(get_db())[int(number)]
+  if post == None:
+    return "<center><h1>404</h1></center>"
+  else:
+    return render_template("board.html", board=board,
+      post_list={post.number : post}, number=number)
+
+@app.route("/<board>/<regex('[0-9]+'):number>/res", methods=['POST'])
+def respond(board, number):
+  if request.method == "POST":
+    title = request.form['title']
+    name = "Anonymous" if request.form["name"] == "" else request.form["name"]
+    content = request.form["content"]
+    parent = number
+    db = get_db();
+    db.execute(
+    """
+    insert into post(post_time, board, title, name, content, image_src, parent)
+    values (datetime('now'), ?, ?, ?, ?, null, ?)
+    """, [board, title, name, content, parent])
+    db.commit();
+    return "<center><h1>Post successful!</h1></center>"
 
 @app.route("/<board>/newthread/", methods=['POST'])
 def newthread(board):
@@ -66,7 +99,6 @@ def newthread(board):
     title = request.form["title"]
     name = "Anonymous" if request.form["name"] == "" else request.form["name"]
     content = request.form["content"]
-    parent = 0
     db = get_db()
     db.execute(
       """
