@@ -1,6 +1,16 @@
+html {
+  height: 100%;
+}
+
 body {
-  background-color: #ddd;
+  /* background-color: #ddd; */
   font-family: sans-serif;
+  height:100%;
+  margin: 0;
+  background: -webkit-linear-gradient(#ccc, #eee); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(#ccc, #eee); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(#ccc, #eee); /* For Firefox 3.6 to 15 */
+  /* background: linear-gradient(#ccc, #eee); /* Standard syntax */
 }
 
 hr {
@@ -16,11 +26,19 @@ hr {
   margin-right: auto;
 }
 
+span.upload_notice {
+  font-size: xx-small;
+}
+
 .input {
   border-bottom: 1px solid black;
   margin-top: 5px;
   margin-bottom: -1px;
   padding-bottom: 5px;
+}
+
+.input input.file {
+  float: right;
 }
 
 .input input.text {
