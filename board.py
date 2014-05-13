@@ -26,7 +26,7 @@ class Board:
     self.subtext = subtext
 
   def getPosts(self, db):
-    result = db.execute("select * from post where board=?", self.url)
+    result = db.execute("select * from post where board=? order by post_time desc", self.url)
     entries = result.fetchall()
     posts = []
     for post in entries:

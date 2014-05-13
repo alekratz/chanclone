@@ -14,16 +14,18 @@
 
   <ol id="posts">
   {% for post in post_list %}
-    <div class="post">
+    <div class="post" id="{{ post.number }}">
       <li id="{{ post.number }}">
         <div class="post-head">
           {{ post.number }} - 
           <span class="title">{{ post.title }}</span> 
           <span class="name">{{ post.name }}</span>
+          <span class="time">{{ post.post_time }}</span>
         </div><br/>
         <span class="content">{{ post.content }}</span>
       </li>
     </div>
+    <hr />
   {% endfor %}
   </ol>
 {% endblock %}
