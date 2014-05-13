@@ -1,0 +1,21 @@
+body {
+  background-color: #eee;
+  font-family: sans-serif;
+}
+
+.post {
+  border: ridge black;
+}
+
+.title {
+  color: #5a5;
+}
+
+.name {
+  color: #a55;
+  font-weight: bold;
+}
+
+.post-head {
+  border-bottom: 1px solid black;
+}
