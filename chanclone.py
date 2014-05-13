@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
-import sqlite3, os
-from flask import Flask, render_template, g
+import sqlite3, os, logging
+from logging.handlers import RotatingFileHandler as RFH
+from flask import Flask, render_template, g, request, flash
 from post import Post
 from board import Board, getBoards, reloadBoardCache
 
@@ -37,6 +38,10 @@ def close_db(error):
     g.sqlite_db.close()
 
 def init_db():
+  # continue if the file exists
+  if os.path.isfile('chanclone.db'):
+    return
+  app.logger.debug("Creating new database")
   with app.app_context():
     db = get_db()
     with app.open_resource('schema.sql', mode='r') as f:
@@ -46,24 +51,39 @@ def init_db():
 #
 # Routing methods
 #
+
 @app.route("/<board>/")
 def boardPage(board):
   b = getBoards(get_db())[board]
+  posts = b.getPosts(get_db())
+  app.logger.info("Retrieving " + str(len(posts)) + " posts")
   return render_template("board.html", board=board,
     post_list=b.getPosts(get_db()))
 
-@app.route("/<board>/newthread")
-def newthread(board, method=['GET', 'POST']):
+@app.route("/<board>/newthread/", methods=['POST'])
+def newthread(board):
   if request.method == "POST":
     title = request.form["title"]
     name = "Anonymous" if request.form["name"] == "" else request.form["name"]
     content = request.form["content"]
     parent = 0
+    db = get_db()
+    db.execute(
+      """
+      insert into post(post_time, board, title, name, content, image_src)
+      values (datetime('now'), ?, ?, ?, ?, null)
+      """, [board, title, name, content])
+    db.commit()
+    app.logger.info("Added new post in " + board)
+    return "<center><h1>Post successful!</h1></center"
 
 @app.route("/")
 def index():
   return "<h1>It works!</h1>"
 
 if __name__ == "__main__":
+  handler = RFH("chanclone.log", maxBytes=100 * 1024 * 1024)
+  handler.setLevel(logging.INFO)
+  app.logger.addHandler(handler)
   init_db()
   app.run()

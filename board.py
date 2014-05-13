@@ -11,6 +11,7 @@ def getBoards(db):
   if board_cache == None:  
     result = db.execute("select * from board")
     entries = result.fetchall()
+    print "entries:", len(entries)
     boards = {}
     for row in entries:
       b = Board(row['url'], row['name'], row['subtext'])
@@ -25,12 +26,12 @@ class Board:
     self.subtext = subtext
 
   def getPosts(self, db):
-    result = db.execute("select * from post where board='"+"'")
+    result = db.execute("select * from post where board=?", self.url)
     entries = result.fetchall()
     posts = []
     for post in entries:
       newPost = Post(post['id'], post['post_time'], post['board'], post['title'],
         post['name'], post['content'], post['image_src'], post['parent'])
-      posta.append(newPost)
+      posts.append(newPost)
     return posts
 
