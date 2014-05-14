@@ -227,6 +227,8 @@ def index():
   return "<h1>It works!</h1>"
 
 if __name__ == "__main__":
+  from sys import argv
+  argv = argv[1:]
   handler = RFH("chanclone.log", maxBytes=100 * 1024 * 1024)
   handler.setLevel(logging.INFO)
   app.logger.addHandler(handler)
@@ -235,4 +237,4 @@ if __name__ == "__main__":
   # add thumbnail function to the app
   app.jinja_env.filters['thumbnail'] = thumbnail
 
-  app.run()
+  app.run(host=argv[0] if len(argv) > 0 else "127.0.0.1")
