@@ -30,7 +30,9 @@
         <span class="time">{{ post.post_time }}</span><br/>
         </div>
         {% if post.image_src %}
-        <span class="image">{{ post.image_src }}</span>
+        <a href='{{ post.image_src }}'>
+        <span class="image"><img src='{{ post.image_src|thumbnail() }}' /></span>
+        </a>
         {% endif %}
         <span class="content">{{ post.content }}</span>
         {% for childid, child in post.children.iteritems() %}
