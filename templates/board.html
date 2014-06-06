@@ -27,12 +27,11 @@
         {{ id }} - 
         <span class="title">{{ post.title }}</span> 
         <span class="name">{{ post.name }}</span>
-        <span class="time">{{ post.post_time }}</span><br/>
+        <span class="time">{{ post.post_time }}</span>
         </div>
         {% if post.image_src %}
         <a href='{{ post.image_src }}'>
-        <span class="image"><img src='{{ post.image_src|thumbnail() }}' /></span>
-        </a>
+        <span class="image"><img src='{{ post.image_src|thumbnail() }}' /></span></a>
         {% endif %}
         <span class="content">{{ post.content }}</span>
         {% for childid, child in post.children.iteritems() %}

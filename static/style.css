@@ -53,15 +53,25 @@ span.upload_notice {
   box-sizing: border-box;         /* Opera/IE 8+ */
 }
 
-.post {
+div.post {
+  /* 
   border: 1px solid black;
-  padding: 3px;
   background-color: #ccc;
+  */
+  padding: 3px 5px;
+}
+
+li.post {
+  clear: both;
 }
 
 .post .child {
+  border: 1px solid #aaa;
   background-color: #d5d5d5;
   margin-bottom: 5px;
+}
+
+.content {
 }
 
 .title {
@@ -74,5 +84,12 @@ span.upload_notice {
 }
 
 .post-head {
-  border-bottom: 1px solid black;
+}
+
+.image {
+}
+
+img {
+  border: 5px solid #aaa;
+  background-color: #aaa;
 }
